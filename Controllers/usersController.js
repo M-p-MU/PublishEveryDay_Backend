@@ -4,7 +4,7 @@ const {
   verifyAuthToken,
 } = require("../Middlewares/jwtAuth.js");
 const { hashInputData } = require("../Middlewares/hashInputData.js");
-const { transporter } = require("../Middlewares/nodemailerFunction.js");
+const transporter  = require("../Middlewares/nodemailerFunction.js");
 const { ObjectId } = require("mongodb");
 const fs = require("fs").promises;
 const bcrypt = require("bcrypt");
