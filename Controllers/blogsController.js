@@ -16,9 +16,9 @@ const createBlog = async (req,res) => {
 
     const createdBlog = {
       _id: result.insertedId,
-      title: result.title,
-      content: result.content,
-      image: result.image,
+      title: blogData.title,
+      content: blogData.content,
+      image: blogData.image,
     };
 
     res.status(201).json({
