@@ -8,7 +8,7 @@ const swaggerOptions = require("./Documentation/swagger.js");
 const { connectDatabase } = require("./database.js");
 const cors = require("cors");
 const compression = require("compression");
-const path = require('path');
+const path = require("path");
 const helmet = require("helmet");
 
 const app = express();
@@ -23,7 +23,7 @@ app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
-app.set('views', path.join(__dirname, 'Views')); 
+app.set("views", path.join(__dirname, "Views"));
 //routes configuration
 app.use("/api/v1/ped/", blogsRoutes);
 app.use("/api/v1/ped/", usersRoutes);
@@ -34,23 +34,14 @@ app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // Default route
 app.get("/", (req, res) => {
-  res.send("<h1>Welcome to the PublishEveryDay Backend repository!</h1>");
+  res.status(200);
+  res.render("index.ejs");
 });
 
 // Error handling
 app.use((req, res) => {
   res.status(404);
   res.render("404");
-});
-
-// Default route
-app.use((req, res) => {
-  if (req.path === "/") {
-    res.send("<h1>Welcome to the PublishEveryDay Backend repository!<h1> ");
-  } else {
-    res.status(404);
-    res.render("./Views/404.ejs");
-  }
 });
 
 module.exports = app;

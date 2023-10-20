@@ -4,7 +4,7 @@ const {
   verifyAuthToken,
 } = require("../Middlewares/jwtAuth.js");
 const { hashInputData } = require("../Middlewares/hashInputData.js");
-const { transporter } = require("../Middlewares/nodemailerFunction.js");
+const  transporter  = require("../Middlewares/nodemailerFunction.js");
 const { ObjectId } = require("mongodb");
 const fs = require("fs").promises;
 const bcrypt = require("bcrypt");
@@ -58,8 +58,7 @@ const createUser = async (req, res) => {
 
     // Generate a unique UUID token for email verification
     const id = result.insertedId;
-    console.log(id);
-    const verificationToken = uuidv4() + id;
+     const verificationToken = uuidv4() + id;
 
     // Send the verification email with the EJS template
     const verificationLink = `${currentUrl}api/v1/ped/verify/${id}/${verificationToken}`;
