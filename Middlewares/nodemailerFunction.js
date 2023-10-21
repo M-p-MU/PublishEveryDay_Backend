@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const process = require("process");
 const transporter = nodemailer.createTransport({
   // Configuration options for your email service
   service: "gmail",

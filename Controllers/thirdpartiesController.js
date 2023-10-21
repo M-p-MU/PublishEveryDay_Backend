@@ -1,4 +1,3 @@
-import { model } from "mongoose";
 
 const passport = require("passport");
 
@@ -35,7 +34,7 @@ const githubCallback = (req, res) => {
   })(req, res);
 };
 
-export const twitterLogin = (req, res) => {
+const twitterLogin = (req, res) => {
   // Initiates Twitter OAuth authentication
   passport.authenticate("twitter", {
     successRedirect: "http://www.ped.com/dashboard",
@@ -43,7 +42,7 @@ export const twitterLogin = (req, res) => {
   })(req, res);
 };
 
-export const twitterCallback = (req, res) => {
+ const twitterCallback = (req, res) => {
   // Callback URL after Twitter authentication
   passport.authenticate("twitter", {
     successRedirect: "http://www.ped.com/dashboard",

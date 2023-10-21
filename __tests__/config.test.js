@@ -5,6 +5,7 @@ const { describe, it, expect, beforeEach } = require('@jest/globals');
 
 describe('Config Module', () => {
   beforeEach(() => {
+    // eslint-disable-next-line no-undef
     jest.resetModules();
   });
 

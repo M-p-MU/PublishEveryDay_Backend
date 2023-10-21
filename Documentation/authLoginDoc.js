@@ -1,8 +1,8 @@
 /**
  * @swagger
  * tags:
- *   name: Authentication
- *   description: OAuth authentication routes and controllers.
+ *   name: Signup and Login with  Third Parties
+ *   description: OAuth authentication for allowing users to signup using third party account.
  */
 
 /**
@@ -11,7 +11,7 @@
  *   get:
  *     summary: Initiate Google OAuth authentication
  *     description: Initiates Google OAuth authentication.
- *     tags: [Authentication]
+ *     tags: [Signup and Login with  Third Parties]
  *     responses:
  *       302:
  *         description: Redirect to Google OAuth login page.
@@ -23,7 +23,7 @@
  *   get:
  *     summary: Google OAuth callback
  *     description: Callback URL after Google OAuth authentication.
- *     tags: [Authentication]
+ *     tags: [Signup and Login with  Third Parties]
  *     responses:
  *       302:
  *         description: Redirect to the appropriate page after authentication.
@@ -35,7 +35,7 @@
  *   get:
  *     summary: Initiate GitHub OAuth authentication
  *     description: Initiates GitHub OAuth authentication.
- *     tags: [Authentication]
+ *     tags: [Signup and Login with  Third Parties]
  *     responses:
  *       302:
  *         description: Redirect to GitHub OAuth login page.
@@ -47,7 +47,7 @@
  *   get:
  *     summary: GitHub OAuth callback
  *     description: Callback URL after GitHub OAuth authentication.
- *     tags: [Authentication]
+ *     tags: [Signup and Login with  Third Parties]
  *     responses:
  *       302:
  *         description: Redirect to the appropriate page after authentication.
@@ -59,7 +59,7 @@
  *   get:
  *     summary: Initiate Twitter OAuth authentication
  *     description: Initiates Twitter OAuth authentication.
- *     tags: [Authentication]
+ *     tags: [Signup and Login with  Third Parties]
  *     responses:
  *       302:
  *         description: Redirect to Twitter OAuth login page.
@@ -71,7 +71,7 @@
  *   get:
  *     summary: Twitter OAuth callback
  *     description: Callback URL after Twitter OAuth authentication.
- *     tags: [Authentication]
+ *     tags: [Signup and Login with  Third Parties]
  *     responses:
  *       302:
  *         description: Redirect to the appropriate page after authentication.

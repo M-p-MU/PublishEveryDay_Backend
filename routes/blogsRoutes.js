@@ -1,5 +1,9 @@
 const express = require("express");
+const router = express.Router();
 const upload = require("../multerConfig.js");
+const { body } = require("express-validator");
+const rateLimit = require("express-rate-limit");
+const ObjectId = require("mongodb").ObjectId;
 const blogsController = require("../Controllers/blogsController");
 
 const {
@@ -11,31 +15,110 @@ const {
   getAllBlogsPaginated,
   getTopBlogs,
   getBlogsByOwner,
+  commentOnBlog,
+  replyOnComment,
+  deleteComment,
+  updateComment,
+  likeBlog,
+  unlikeBlog,
+  replyToReply,
+  deleteReply,
+  editReply,
+  getBlogsByCategory,
 } = blogsController;
 
-const router = express.Router();
+// Rate limiting middleware
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+});
 
-// Route to create a new blog
-router.post("/blogs", upload.single("image"), createBlog);
+// Input validation middleware
+const validateObjectId = (req, res, next) => {
+  if (!ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ error: "Invalid Blog ID" });
+  }
+  next();
+};
+
+// Route to create a new blog with rate limiting and file upload
+router.post(
+  "/blogs",
+  [
+    body("title").not().isEmpty().withMessage("Title is required"),
+    body("content").not().isEmpty().withMessage("Content is required"),
+  ],
+  limiter,
+  upload.single("image"),
+  createBlog
+);
 
 // Route to get all blogs with pagination
 router.get("/blogs/paginated", getAllBlogsPaginated);
+
 // Route to get all blogs
 router.get("/blogs", getAllBlogs);
+// Route for getting blogs by category
+router.get("/blogs/by-category/:category", getBlogsByCategory);
 
-// Route to get a single blog by ID
-router.get("/blogs/:id", getBlogById);
+// Route to get a single blog by ID with input validation
+router.get("/blogs/:id", validateObjectId, getBlogById);
 
-// Route to update an existing blog
-router.put("/blogs/:id", upload.single("image"), updateBlog);
+// Route to update an existing blog with rate limiting and file upload
+router.put(
+  "/blogs/:id",
+  [
+    body("title").not().isEmpty().withMessage("Title is required"),
+    body("content").not().isEmpty().withMessage("Content is required"),
+  ],
+  limiter,
+  upload.single("image"),
+  updateBlog
+);
 
 // Route to delete a blog by ID
 router.delete("/blogs/:id", deleteBlog);
 
-//Route to get top 10 blogs with most likes and comments
+// Route to get top 10 blogs with most likes and comments
 router.get("/top-blogs", getTopBlogs);
 
-// New route to get blogs by owner
-router.get("/blogs/by-owner/:ownerId", getBlogsByOwner);
+// Route for searching blog by writter name
+router.get("/blogs/by-owner/:id", getBlogsByOwner);
+// Route to comment on a blog
+router.post("/blogs/:id/comments", commentOnBlog);
 
+// Route to reply to a comment
+router.post("/blogs/:blogId/comments/:commentId/replies", replyOnComment);
+router.delete(
+  "/blogs/:blogId/comments/:commentId/replies/:replyId",
+  deleteReply
+);
+// Route to delete a comment
+router.delete("/blogs/:blogId/comments/:commentId", deleteComment);
+
+// Route to update a comment
+router.put("/blogs/:blogId/comments/:commentId", updateComment);
+
+// Route to like a blog
+router.post("/blogs/:id/like", likeBlog);
+
+// Route to unlike a blog
+router.post("/blogs/:id/unlike", unlikeBlog);
+
+// Route to reply to a reply
+router.post(
+  "/blogs/:blogId/comments/:commentId/replies/:replyId",
+  replyToReply
+);
+// Route to edit a reply on a comment
+router.put(
+  "/blogs/:blogId/comments/:commentId/replies/:replyId",
+  [
+    body("editedReplyText")
+      .not()
+      .isEmpty()
+      .withMessage("Edited reply text is required"),
+  ],
+  editReply
+);
 module.exports = router;

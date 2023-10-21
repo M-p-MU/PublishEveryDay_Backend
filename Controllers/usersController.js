@@ -1,19 +1,17 @@
+/* eslint-disable no-undef */
 const { getCollection } = require("../database.js");
 const {
   generateAuthToken,
   verifyAuthToken,
-} = require("../Middlewares/jwtAuth.js");
+} = require("../Middlewares/jwtAuthorization.js");
 const { hashInputData } = require("../Middlewares/hashInputData.js");
-const  transporter  = require("../Middlewares/nodemailerFunction.js");
+const transporter = require("../Middlewares/nodemailerFunction.js");
 const { ObjectId } = require("mongodb");
 const fs = require("fs").promises;
 const bcrypt = require("bcrypt");
 const ejs = require("ejs");
 const path = require("path");
-const { dirname } = require("path");
-const { fileURLToPath } = require("url");
 const { v4: uuidv4 } = require("uuid");
-const { get } = require("http");
 
 //_________________ Get all users____________________/
 
@@ -58,12 +56,13 @@ const createUser = async (req, res) => {
 
     // Generate a unique UUID token for email verification
     const id = result.insertedId;
-     const verificationToken = uuidv4() + id;
+    const verificationToken = uuidv4() + id;
 
     // Send the verification email with the EJS template
     const verificationLink = `${currentUrl}api/v1/ped/verify/${id}/${verificationToken}`;
 
     const emailTemplatePath = path.join(
+      // eslint-disable-next-line no-undef
       __dirname,
       "../Views/emailVerification.ejs"
     );
@@ -163,11 +162,14 @@ const verifyUser = async (req, res) => {
 //_____________confirm email verification____________________/
 const userEmailVerified = async (req, res) => {
   try {
-    const __dirname = path.dirname(__filename); 
-    const emailTemplatePath = path.join(__dirname, '../Views/confirmVerification.html');
+    const __dirname = path.dirname(__filename);
+    const emailTemplatePath = path.join(
+      __dirname,
+      "../Views/confirmVerification.html"
+    );
 
     res.sendFile(emailTemplatePath);
-} catch (error) {
+  } catch (error) {
     console.error(
       "Error giving the feedback after  clicking verification link:",
       error
@@ -387,43 +389,50 @@ const updateUserById = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-//______________ Delete user by ID or User deleting their own account______________/
 const deleteUserById = async (req, res) => {
-  const id = `${req.params.id}`;
+  const userId = req.params.id;
 
   try {
     const usersCollection = getCollection("users");
+    const commentsCollection = getCollection("comments");
+    const repliesCollection = getCollection("replies");
 
-    if (!ObjectId.isValid(id)) {
+    if (!ObjectId.isValid(userId)) {
       return res.status(400).json({ error: "Invalid UserId." });
     }
 
-    const authToken = req.headers.authorization;
-
-    let token = null;
-
-    if (authToken && authToken.startsWith("Bearer ")) {
-      token = authToken.split(" ")[1];
-    }
+    const token = req.headers.authorization;
 
     if (token) {
       const decodedToken = verifyAuthToken(token);
       if (
-        decodedToken.input._id !== id ||
+        decodedToken.input._id !== userId ||
         decodedToken.input.role !== "admin"
       ) {
         return res
           .status(403)
           .json({ error: "You do not have permission to delete this user." });
       } else {
-        const result = await usersCollection.deleteOne({
-          _id: new ObjectId(id),
+        // Find and delete the user from the users collection
+        const userResult = await usersCollection.deleteOne({
+          _id: new ObjectId(userId),
         });
 
-        if (result.deletedCount === 0) {
+        if (userResult.deletedCount === 0) {
           return res.status(404).json({ error: "User not found." });
         }
+
+        // Update comments to remove user details
+        await commentsCollection.updateMany(
+          { "user.userId": userId },
+          { $set: { "user.username": "DeletedUser", "user.userId": null } }
+        );
+
+        // Update replies to remove user details
+        await repliesCollection.updateMany(
+          { "user.userId": userId },
+          { $set: { "user.username": "DeletedUser", "user.userId": null } }
+        );
 
         res.status(204).send();
       }

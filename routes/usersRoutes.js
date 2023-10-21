@@ -19,15 +19,15 @@ const {
 } = usersController;
 
 // Create a user (user registration )
-router.post("/signup", createUser);
+router.post("/users/signup", createUser);
 //verify user with unique token
-router.get("/verify/:sentUserId/:token", verifyUser);
+router.get("/users/verify/:sentUserId/:token", verifyUser);
 //verified user route
-router.get("/verified/:query", userEmailVerified);
+router.get("/users/verified/:query", userEmailVerified);
 // Login a user
-router.post("/login", loginUser);
+router.post("/users/login", loginUser);
 // Get a user by ID
-router.get("/users/:id", getUserById);
+router.get("/users/users/:id", getUserById);
 // Update a user by ID
 router.put("/users/:id", updateUserById);
 // Delete a user by ID
@@ -39,6 +39,6 @@ router.post("/users/:userId/unfollow", unfollowUser);
 // Report content
 router.post("/report-content", reportContent);
 // Search for user and get their activities
-router.get("/search", searchUsersWithBlogs);
+router.get("/users/search", searchUsersWithBlogs);
 
 module.exports = router;

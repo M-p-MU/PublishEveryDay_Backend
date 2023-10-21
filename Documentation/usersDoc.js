@@ -7,7 +7,7 @@
 
 /**
  * @swagger
- * /users/register:
+ * /api/v1/ped/users/register:
  *   post:
  *     summary: Register a new user
  *     description: Register a new user with the provided data.
@@ -58,7 +58,7 @@
 
 /**
  * @swagger
- * /users/login:
+ * /api/v1/ped/users/login:
  *   post:
  *     summary: Login as a user
  *     description: Log in as a user with the provided credentials.
@@ -105,7 +105,7 @@
 
 /**
  * @swagger
- * /users/{id}:
+ * /api/v1/ped/users/{id}:
  *   get:
  *     summary: Get user by ID
  *     description: Retrieve user details by their unique identifier.
@@ -137,7 +137,7 @@
 
 /**
  * @swagger
- * /users/{id}:
+ * /api/v1/ped/users/{id}:
  *   put:
  *     summary: Update user by ID
  *     description: Update user details by their unique identifier.
@@ -194,7 +194,7 @@
 
 /**
  * @swagger
- * /users/{id}:
+ * /api/v1/ped/users/{id}:
  *   delete:
  *     summary: Delete user by ID
  *     description: Delete a user by their unique identifier.
@@ -225,7 +225,7 @@
 
 /**
  * @swagger
- * /users/{userId}/follow:
+ * /api/v1/ped/users/{userId}/follow:
  *   post:
  *     summary: Follow a blogger
  *     description: Allows a user to follow a blogger by their unique identifier.
@@ -252,7 +252,7 @@
 
 /**
  * @swagger
- * /users/{userId}/unfollow:
+ * /api/v1/ped/users/{userId}/unfollow:
  *   post:
  *     summary: Unfollow a blogger
  *     description: Allows a user to unfollow a blogger by their unique identifier.
@@ -285,7 +285,7 @@
 
 /**
  * @swagger
- * /users/report-content:
+ * /api/v1/ped/users/report-content:
  *   post:
  *     summary: Report content for violence
  *     description: Allows a user to report content for violence and notifies the writer.

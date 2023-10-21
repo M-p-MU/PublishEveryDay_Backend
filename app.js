@@ -1,13 +1,15 @@
+/* eslint-disable no-undef */
 const express = require("express");
 const swaggerJSDoc = require("swagger-jsdoc");
 const morgan = require("morgan");
 const swaggerUI = require("swagger-ui-express");
-const blogsRoutes = require("./routes/blogsRoutes.js");
-const usersRoutes = require("./routes/usersRoutes.js");
+const blogsRoutes = require('./Routes/blogsRoutes.js');
+const usersRoutes = require("./Routes/usersRoutes.js");
 const swaggerOptions = require("./Documentation/swagger.js");
 const { connectDatabase } = require("./database.js");
 const cors = require("cors");
 const compression = require("compression");
+const methodOverride = require('method-override');
 const path = require("path");
 const helmet = require("helmet");
 
@@ -23,6 +25,7 @@ app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
+app.use(methodOverride('_method'));
 app.set("views", path.join(__dirname, "Views"));
 //routes configuration
 app.use("/api/v1/ped/", blogsRoutes);
@@ -44,6 +47,7 @@ app.use((req, res) => {
   res.render("404");
 });
 // Error handling middleware
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');

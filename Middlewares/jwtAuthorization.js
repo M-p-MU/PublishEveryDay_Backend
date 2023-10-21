@@ -1,6 +1,6 @@
-// Filename: jwtAuth.js
 const jwt = require("jsonwebtoken");
 const process = require("process");
+
 // Helper function to generate JWT tokens with user data
 const generateAuthToken = (input) => {
   const secretKey = process.env.JWT_SECRET;
@@ -9,10 +9,15 @@ const generateAuthToken = (input) => {
     algorithm: "HS256",
   });
 };
-
+// Helper function to verify JWT tokens
 const verifyAuthToken = (token) => {
   const secretKey = process.env.JWT_SECRET;
   try {
+    // if token has Bearer at the start, remove it
+    if (token.startsWith("Bearer ")) {
+      token = token.slice(7, token.length);
+    }
+    // Verify the token
     const decoded = jwt.verify(token, secretKey, { algorithm: "HS256" });
 
     // Check if the token has expired
@@ -28,7 +33,7 @@ const verifyAuthToken = (token) => {
     throw new Error("Token verification failed");
   }
 };
-
+// Export the helper functions
 module.exports = {
   generateAuthToken,
   verifyAuthToken,

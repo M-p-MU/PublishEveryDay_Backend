@@ -3,7 +3,7 @@ const router = express.Router();
 
 // Import controllers
 const authController = require('../Controllers/authController');
-const { model } = require('mongoose');
+
 
 const {
   googleLogin,
