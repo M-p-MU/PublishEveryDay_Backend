@@ -4,7 +4,7 @@ const upload = require("../multerConfig.js");
 const { body } = require("express-validator");
 const rateLimit = require("express-rate-limit");
 const ObjectId = require("mongodb").ObjectId;
-const blogsController = require("../Controllers/blogsController");
+const blogsController = require("../Controllers/blogsController.js");
 
 const {
   createBlog,
