@@ -9,8 +9,8 @@ describe('Config Module', () => {
     jest.resetModules();
   });
 
-  it('should have a default port of 3000', () => {
-    expect(config).toHaveProperty('port', 3000);
+  it('should have a default port of 4000', () => {
+    expect(config).toHaveProperty('port', 4000);
   });
 
   it('should read port from environment variables if available', () => {
@@ -22,6 +22,6 @@ describe('Config Module', () => {
   it('should use the default port if the environment variable is not set', () => {
     delete process.env.PORT;
     const newConfig = require('../config');
-    expect(newConfig).toHaveProperty('port', 3000);
+    expect(newConfig).toHaveProperty('port', 4000);
   });
 });
