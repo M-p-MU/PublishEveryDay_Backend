@@ -12,18 +12,18 @@ const fs = require("fs");
 const createBlog = async (req, res) => {
   try {
     // Check if a valid token is present in the request headers
-    const token = req.headers.authorization;
+    // const token = req.headers.authorization;
     // console.log(token);
-    if (!token) {
-      return res.status(401).json({ error: "Unauthorized: Token is missing" });
-    }
+    // if (!token) {
+    //   return res.status(401).json({ error: "Unauthorized: Token is missing" });
+    // }
 
     try {
-      const decoded = await verifyAuthToken(token);
-      req.user = decoded;
-
-      const blogsCollection = getCollection("blogs");
+      // const decoded = await verifyAuthToken(token);
+      // req.user = decoded;
       const blogData = req.body;
+      const blogsCollection =await  getCollection("blogs");
+      
 
       // Handle image uploads if included in the request
       if (req.file) {
@@ -82,8 +82,8 @@ const createBlog = async (req, res) => {
         },
       ]),
         (blogData.likes = []);
-      blogData.writterId = req.user._id;
-      blogData.writter = req.user.username;
+      // blogData.writterId = req.user._id;
+      // blogData.writter = req.user.username;
       blogData.likesCount = 0;
       blogData.commentsCount = 0;
       blogData.createdAt = new Date();
