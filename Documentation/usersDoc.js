@@ -7,7 +7,7 @@
 
 /**
  * @swagger
- * /api/v1/ped/users/register:
+ * /api/v1/ped/users/signup:
  *   post:
  *     summary: Register a new user
  *     description: Register a new user with the provided data.

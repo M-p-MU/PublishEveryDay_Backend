@@ -52,7 +52,7 @@ const createUser = async (req, res) => {
     };
 
     // Current URL
-    const currentUrl = "http://localhost:3000/";
+    const currentUrl = "https://pedbackend.onrender.com/";
 
     // Generate a unique UUID token for email verification
     const id = result.insertedId;
