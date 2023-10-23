@@ -59,7 +59,7 @@ const createUser = async (req, res) => {
     const verificationToken = uuidv4() + id;
 
     // Send the verification email with the EJS template
-    const verificationLink = `${currentUrl}api/v1/ped/verify/${id}/${verificationToken}`;
+    const verificationLink = `${currentUrl}api/v1/ped/users/verify/${id}/${verificationToken}`;
 
     const emailTemplatePath = path.join(
       // eslint-disable-next-line no-undef
@@ -124,7 +124,7 @@ const verifyUser = async (req, res) => {
     console.log(currentTime);
     if (currentTime > verificationRecord.expiresAt) {
       let message = "link has expired";
-      return res.redirect(`/api/v1/ped/verified/error=true&message=${message}`);
+      return res.redirect(`/api/v1/ped/users/verified/error=true&message=${message}`);
     }
 
     // Retrieve the hashed token from the database
@@ -137,7 +137,7 @@ const verifyUser = async (req, res) => {
     // Compare the freshly hashed token with the stored hashed token
     if (tokenNotChanged === false) {
       let message = "Invalid token";
-      return res.redirect(`/api/verified/error=true&message= ${message}`);
+      return res.redirect(`api/v1/ped/users/verified/error=true&message= ${message}`);
     }
 
     // Mark the user's email as verified in the users collection
@@ -155,7 +155,7 @@ const verifyUser = async (req, res) => {
   } catch (error) {
     console.error("Error verifying email:", error);
     let message = "Internal Server Error";
-    return res.redirect(`/api/v1/ped/verified/error=true&message=${message}`);
+    return res.redirect(`/api/v1/ped/users/verified/error=true&message=${message}`);
   }
 };
 
