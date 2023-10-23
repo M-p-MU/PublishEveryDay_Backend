@@ -124,7 +124,9 @@ const verifyUser = async (req, res) => {
     console.log(currentTime);
     if (currentTime > verificationRecord.expiresAt) {
       let message = "link has expired";
-      return res.redirect(`/api/v1/ped/users/verified/error=true&message=${message}`);
+      return res.redirect(
+        `/api/v1/ped/users/verified/error=true&message=${message}`
+      );
     }
 
     // Retrieve the hashed token from the database
@@ -137,7 +139,9 @@ const verifyUser = async (req, res) => {
     // Compare the freshly hashed token with the stored hashed token
     if (tokenNotChanged === false) {
       let message = "Invalid token";
-      return res.redirect(`api/v1/ped/users/verified/error=true&message= ${message}`);
+      return res.redirect(
+        `api/v1/ped/users/verified/error=true&message= ${message}`
+      );
     }
 
     // Mark the user's email as verified in the users collection
@@ -151,30 +155,30 @@ const verifyUser = async (req, res) => {
       _id: verificationRecord._id,
     });
     let message = "Email is verified successfully";
-    return res.redirect(`/api/v1/ped/verified/error=false&message= ${message}`);
+    return res.redirect(`/api/v1/ped/users/verified/error=false&message= ${message}`);
   } catch (error) {
     console.error("Error verifying email:", error);
     let message = "Internal Server Error";
-    return res.redirect(`/api/v1/ped/users/verified/error=true&message=${message}`);
+    return res.redirect(
+      `/api/v1/ped/users/verified/error=true&message=${message}`
+    );
   }
 };
 
 //_____________confirm email verification____________________/
 const userEmailVerified = async (req, res) => {
   try {
-    const __dirname = path.dirname(__filename);
-    const emailTemplatePath = path.join(
-      __dirname,
-      "../Views/confirmVerification.html"
-    );
+    const { error, message } = req.query;
+    if (error === "true") {
+      return res.render("error.ejs", { message });
+    }
 
-    res.sendFile(emailTemplatePath);
+    res.render("confirmVerification.ejs");
   } catch (error) {
-    console.error(
-      "Error giving the feedback after  clicking verification link:",
-      error
-    );
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error rendering templates:", error);
+    res
+      .status(500)
+      .render("error.ejs", { message: "Internal Server Error", error });
   }
 };
 
