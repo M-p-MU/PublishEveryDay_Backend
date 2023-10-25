@@ -5,7 +5,8 @@ const {
   processContentWithImages,
   storeEmbeddedImages,
 } = require("../Middlewares/sanitizeContent.js");
-const fs = require("fs");
+const fs= require("fs");
+
 
 //__________Create a new blog/any content type___________/
 // eslint-disable-next-line no-undef
@@ -1230,7 +1231,6 @@ const editReply = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 module.exports = {
   createBlog,
   getAllBlogs,
