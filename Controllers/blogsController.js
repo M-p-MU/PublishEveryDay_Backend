@@ -12,29 +12,40 @@ const fs = require("fs");
 const createBlog = async (req, res) => {
   try {
     // Check if a valid token is present in the request headers
-    // const token = req.headers.authorization;
+    const token = req.headers.authorization;
     // console.log(token);
-    // if (!token) {
-    //   return res.status(401).json({ error: "Unauthorized: Token is missing" });
-    // }
+    if (!token) {
+      return res.status(401).json({ error: "Unauthorized: Token is missing" });
+    }
 
     try {
-      // const decoded = await verifyAuthToken(token);
-      // req.user = decoded;
+      const decoded = await verifyAuthToken(token);
+      req.user = decoded;
       const blogData = req.body;
-      const blogsCollection =await  getCollection("blogs");
-      
+      const blogsCollection = await getCollection("blogs");
 
       // Handle image uploads if included in the request
       if (req.file) {
-        // eslint-disable-next-line no-unused-vars
         const uploadDir = "./blogImages/";
+
         const originalName = req.file.originalname;
+
         const timestamp = Date.now();
         const filename = `${timestamp}_${originalName}`;
-        blogData.image = filename;
-      }
 
+        blogData.image = filename;
+
+        const filePath = uploadDir + filename;
+
+        // Save the image
+        fs.writeFile(filePath, req.file.buffer, (err) => {
+          if (err) {
+            console.error("Error saving image:", err);
+          } else {
+            console.log("Image saved successfully");
+          }
+        });
+      }
       // sanitize the content and extract embedded images
       const { sanitizedContent, embeddedImages } = processContentWithImages(
         blogData.content
@@ -187,7 +198,9 @@ const getBlogsByCategory = async (req, res) => {
 
     // Check if any blogs were found
     if (blogs.length === 0) {
-      return res.status(404).json({ error: "No blogs found for the specified category" });
+      return res
+        .status(404)
+        .json({ error: "No blogs found for the specified category" });
     }
 
     // Customize the response format, including pagination
@@ -278,12 +291,18 @@ const updateBlog = async (req, res) => {
       const originalName = file.originalname;
       const timestamp = Date.now();
       const filename = `${timestamp}_${originalName}`;
-
       const filePath = uploadDir + filename;
-      fs.renameSync(file.path, filePath);
-      blogUpdatedData.image = filePath;
+    
+      fs.rename(file.path, filePath, (err) => {
+        if (err) {
+          console.error('Error renaming image:', err);
+        } else {
+          console.log('Image renamed and updated successfully');
+          blogUpdatedData.image = filename;
+        }
+      });
     }
-
+    
     for (const key in req.body) {
       blogUpdatedData[key] = req.body[key];
     }
@@ -371,7 +390,7 @@ const deleteBlog = async (req, res) => {
           .json({ error: "Blog not found, can't perform delete" });
       }
 
-      // Successful deletion with 204 status (No Content)
+     
       res.status(204).end();
     }
   } catch (error) {
@@ -617,7 +636,7 @@ const replyOnComment = async (req, res) => {
 
     const result = await blogsCollection.findOneAndUpdate(
       { _id: new ObjectId(blogId) },
-      { $set: { comments: blog.comments } }, // Update the comments array
+      { $set: { comments: blog.comments } }, 
       { returnDocument: "after" }
     );
 
@@ -1091,8 +1110,13 @@ const deleteReply = async (req, res) => {
     }
 
     // Check if the user has permission to delete the reply
-    if (targetComment.replies[targetReplyIndex].user.userId.toString() !== req.user.userId) {
-      return res.status(403).json({ error: "Forbidden: You don't have permission to delete this reply" });
+    if (
+      targetComment.replies[targetReplyIndex].user.userId.toString() !==
+      req.user.userId
+    ) {
+      return res.status(403).json({
+        error: "Forbidden: You don't have permission to delete this reply",
+      });
     }
 
     // Remove the reply
@@ -1100,12 +1124,14 @@ const deleteReply = async (req, res) => {
 
     const result = await blogsCollection.findOneAndUpdate(
       { _id: new ObjectId(blogId) },
-      { $set: { comments: blog.comments } }, 
+      { $set: { comments: blog.comments } },
       { returnDocument: "after" }
     );
 
     if (result.value === null) {
-      return res.status(404).json({ error: "Blog not found, can't perform reply deletion" });
+      return res
+        .status(404)
+        .json({ error: "Blog not found, can't perform reply deletion" });
     }
 
     const formattedBlog = {
@@ -1205,8 +1231,6 @@ const editReply = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   createBlog,
   getAllBlogs,
@@ -1225,5 +1249,5 @@ module.exports = {
   unlikeBlog,
   replyToReply,
   deleteReply,
-  editReply
+  editReply,
 };

@@ -27,6 +27,8 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(methodOverride("_method"));
 app.set("views", path.join(__dirname, "Views"));
+const images = path.join(__dirname, 'blogImages');
+app.use('/blogImages', express.static(images));
 //routes configuration
 app.use("/api/v1/ped/", blogsRoutes);
 app.use("/api/v1/ped/", usersRoutes);

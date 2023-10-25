@@ -1290,3 +1290,42 @@
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+/**
+ * @swagger
+ * /blogImages/{imageName}:
+ *   get:
+ *     summary: Retrieve a specific blog image by name.
+ *     description: Retrieve a specific blog image by its name.
+ *     parameters:
+ *       - in: path
+ *         name: imageName
+ *         required: true
+ *         description: The name of the image file.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the image.
+ *         content:
+ *           '/':
+ *             schema:
+ *               type: string
+ *       404:
+ *         description: Image not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: An error message indicating that the image was not found.
+ *       500:
+ *         description: Internal Server Error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *     tags:
+ *       - Blogs
+ */
