@@ -11,8 +11,8 @@ const fs = require("fs");
 const createBlog = async (req, res) => {
   try {
     // Check if a valid token is present in the request headers
-    const token = req.headers.authorization;
-     console.log(token);
+    const token = req.headers.Authorization;
+    console.log(token);
     if (!token) {
       return res.status(401).json({ error: "Unauthorized: Token is missing" });
     }
@@ -48,7 +48,6 @@ const createBlog = async (req, res) => {
       // sanitize the content
       const { sanitizedContent } = processContentWithImages(blogData.content);
 
-      
       // Set blog data
       blogData.content = sanitizedContent;
       (blogData.comments = [
@@ -89,13 +88,13 @@ const createBlog = async (req, res) => {
           updatedAt: Date().now,
         },
       ]),
-        (blogData.likes = []);
+      (blogData.likes = []);
       blogData.writterId = req.user._id;
       blogData.author = req.user.username;
       blogData.likesCount = 0;
       blogData.commentsCount = 0;
       blogData.createdAt = new Date();
-      blogData.updatedAt = new Date();      
+      blogData.updatedAt = new Date();
 
       // Insert the blog data into the MongoDB collection
       const result = await blogsCollection.insertOne(blogData);
@@ -105,12 +104,11 @@ const createBlog = async (req, res) => {
         title: blogData.title,
         content: sanitizedContent,
         image: blogData.image,
-    
       };
 
       res.status(201).json({
         message: "Content created successfully.",
-        blog: createdBlog     
+        blog: createdBlog,
       });
     } catch (error) {
       return res.status(401).json({ error: "Unauthorized: Invalid token" });
