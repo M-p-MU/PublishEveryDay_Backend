@@ -3,10 +3,8 @@ const { ObjectId } = require("mongodb");
 const { verifyAuthToken } = require("../Middlewares/jwtAuthorization.js");
 const {
   processContentWithImages,
-  storeEmbeddedImages,
 } = require("../Middlewares/sanitizeContent.js");
-const fs= require("fs");
-
+const fs = require("fs");
 
 //__________Create a new blog/any content type___________/
 // eslint-disable-next-line no-undef
@@ -14,7 +12,7 @@ const createBlog = async (req, res) => {
   try {
     // Check if a valid token is present in the request headers
     const token = req.headers.authorization;
-    // console.log(token);
+     console.log(token);
     if (!token) {
       return res.status(401).json({ error: "Unauthorized: Token is missing" });
     }
@@ -48,11 +46,9 @@ const createBlog = async (req, res) => {
         });
       }
       // sanitize the content and extract embedded images
-      const { sanitizedContent, embeddedImages } = processContentWithImages(
-        blogData.content
-      );
+      const { sanitizedContent } = processContentWithImages(blogData.content);
 
-      console.log("Embedded Images (in createBlog):", embeddedImages);
+      // console.log("Embedded Images (in createBlog):", embeddedImages);
       // Set blog data
       blogData.content = sanitizedContent;
       (blogData.comments = [
@@ -120,9 +116,6 @@ const createBlog = async (req, res) => {
           url: `/api/v1/ped/blogs/${result.insertedId}`,
         },
       });
-
-      // Store embedded images in a designated directory
-      storeEmbeddedImages(embeddedImages);
     } catch (error) {
       return res.status(401).json({ error: "Unauthorized: Invalid token" });
     }
@@ -293,17 +286,17 @@ const updateBlog = async (req, res) => {
       const timestamp = Date.now();
       const filename = `${timestamp}_${originalName}`;
       const filePath = uploadDir + filename;
-    
+
       fs.rename(file.path, filePath, (err) => {
         if (err) {
-          console.error('Error renaming image:', err);
+          console.error("Error renaming image:", err);
         } else {
-          console.log('Image renamed and updated successfully');
+          console.log("Image renamed and updated successfully");
           blogUpdatedData.image = filename;
         }
       });
     }
-    
+
     for (const key in req.body) {
       blogUpdatedData[key] = req.body[key];
     }
@@ -391,7 +384,6 @@ const deleteBlog = async (req, res) => {
           .json({ error: "Blog not found, can't perform delete" });
       }
 
-     
       res.status(204).end();
     }
   } catch (error) {
@@ -637,7 +629,7 @@ const replyOnComment = async (req, res) => {
 
     const result = await blogsCollection.findOneAndUpdate(
       { _id: new ObjectId(blogId) },
-      { $set: { comments: blog.comments } }, 
+      { $set: { comments: blog.comments } },
       { returnDocument: "after" }
     );
 
