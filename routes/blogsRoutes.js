@@ -44,12 +44,12 @@ const validateObjectId = (req, res, next) => {
 // Route to create a new blog with rate limiting and file upload
 router.post(
   "/blogs",
+  upload.single("image"),
   [
     body("title").not().isEmpty().withMessage("Title is required"),
     body("content").not().isEmpty().withMessage("Content is required"),
   ],
   limiter,
-  upload.single("image"),
   createBlog
 );
 

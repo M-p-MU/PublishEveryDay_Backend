@@ -1,27 +1,54 @@
 /* eslint-disable no-unused-vars */
 const path = require("path");
 const { JSDOM } = require("jsdom");
-const domPurify = require("dompurify")(new JSDOM().window);
+const DOMPurify = require("dompurify")(new JSDOM().window);
 
 // Sanitize the content
 async function sanitizeContent(content) {
-  const sanitizedContent = await domPurify.sanitize(content, {
+  const sanitizedContent = DOMPurify.sanitize(content, {
     ADD_TAGS: ["img"],
-    RETURN_DOM: true,
-    IN_PLACE: true,
-    RETURN_TRUSTED_TYPE: true,
-    WHOLE_DOCUMENT: true,
-    RETURN_DOM_FRAGMENT: true,
+    ALLOWED_TAGS: [
+      "p",
+      "a",
+      "strong",
+      "em",
+      "ul",
+      "li",
+      "ol",
+      "br",
+      "img",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "blockquote",
+      "pre",
+      "code",
+      "table",
+      "thead",
+      "caption",
+      "tbody",
+      "tr",
+      "th",
+      "td",
+      "strike",
+      "del",
+      "hr",
+      "sup",
+      "sub",
+      "div",
+      "span",
+    ],
+    ALLOWED_ATTR: ["href", "target", "rel", "src", "alt"],
     FORBID_ATTR: ["onerror"],
     FORBID_TAGS: ["script", "style"],
-    RETURN_DOM_IMPORT: true,
   });
 
-  // Return the sanitized content as a string
-  return sanitizedContent.outerHTML;
+
+  return sanitizedContent.toString();
 }
 
 // Export the sanitizeContent function
-module.exports = {
-  sanitizeContent,
-};
+module.exports = { sanitizeContent };

@@ -1,9 +1,8 @@
 const { getCollection } = require("../database.js");
 const { ObjectId } = require("mongodb");
 const { verifyAuthToken } = require("../Middlewares/jwtAuthorization.js");
-const {
-  processContentWithImages,
-} = require("../Middlewares/sanitizeContent.js");
+const { sanitizeContent } = require("../Middlewares/sanitizeContent.js");
+// const {handleFileUpload} = require("../Middlewares/handleFileUpload.js");
 const fs = require("fs");
 
 //__________Create a new blog/any content type___________/
@@ -12,107 +11,86 @@ const createBlog = async (req, res) => {
   try {
     // Check if a valid token is present in the request headers
     const token = req.headers.authorization;
-    console.log("token before splitting :"+token);
     if (!token) {
       return res.status(401).json({ error: "Unauthorized: Token is missing" });
     }
 
-    try {
-      const decoded = await verifyAuthToken(token);
-      req.user = decoded;
-      const blogData = req.body;
-      const blogsCollection = await getCollection("blogs");
+    const decoded = await verifyAuthToken(token);
+    req.user = decoded;
+    console.log(req.user);
+    const blogData = req.body;
+    const blogsCollection = await getCollection("blogs");
 
-      // Handle image uploads if included in the request
-      if (req.file) {
-        const uploadDir = "./blogImages/";
+    // Sanitize the content
 
-        const originalName = req.file.originalname;
+    const sanitizedContent = await sanitizeContent(blogData.content);
 
-        const timestamp = Date.now();
-        const filename = `${timestamp}_${originalName}`;
-
-        blogData.image = filename;
-
-        const filePath = uploadDir + filename;
-
-        // Save the image
-        fs.writeFile(filePath, req.file.buffer, (err) => {
-          if (err) {
-            console.error("Error saving image:", err);
-          } else {
-            console.log("Image saved successfully");
-          }
-        });
-      }
-      // sanitize the content
-      const { sanitizedContent } = processContentWithImages(blogData.content);
-
-      // Set blog data
-      blogData.content = sanitizedContent;
-      (blogData.comments = [
-        {
-          _id: ObjectId,
-          text: "This is default comment by admin 1.",
-          user: {
-            userId: ObjectId,
-            username: "admin 1",
-          },
-          replies: [
-            {
-              _id: ObjectId,
-              commentId: ObjectId,
-              text: "Reply to the comment by admin 2.",
-              user: {
-                userId: ObjectId,
-                username: "admin 2",
-              },
-              createdAt: Date().now,
-              updatedAt: Date().now,
-              replies: [
-                {
-                  _id: ObjectId,
-                  commentId: ObjectId,
-                  text: "Reply to the reply.",
-                  user: {
-                    userId: ObjectId,
-                    username: "replyer_username",
-                  },
-                  createdAt: Date().now,
-                  updatedAt: Date().now,
-                },
-              ],
-            },
-          ],
-          createdAt: Date().now,
-          updatedAt: Date().now,
-        },
-      ]),
-      (blogData.likes = []);
-      blogData.writterId = req.user._id;
-      blogData.author = req.user.username;
-      blogData.likesCount = 0;
-      blogData.commentsCount = 0;
-      blogData.createdAt = new Date();
-      blogData.updatedAt = new Date();
-
-      // Insert the blog data into the MongoDB collection
-      const result = await blogsCollection.insertOne(blogData);
-
-      const createdBlog = {
-        _id: result.insertedId,
-        title: blogData.title,
-        content: sanitizedContent,
-        image: blogData.image,
-      };
-
-      res.status(201).json({
-        message: "Content created successfully.",
-        blog: createdBlog,
-      });
-    } catch (error) {
-      return res.status(401).json({ error: "Unauthorized: Invalid token" });
+    if (req.file) {
+      blogData.image = req.file.filename;
     }
+
+    // Set blog data
+    blogData.content = sanitizedContent;
+    (blogData.comments = [
+      {
+        _id: ObjectId,
+        text: "This is default comment by admin 1.",
+        user: {
+          userId: ObjectId,
+          username: "admin 1",
+        },
+        replies: [
+          {
+            _id: ObjectId,
+            commentId: ObjectId,
+            text: "Reply to the comment by admin 2.",
+            user: {
+              userId: ObjectId,
+              username: "admin 2",
+            },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            replies: [
+              {
+                _id: ObjectId,
+                commentId: ObjectId,
+                text: "Reply to the reply.",
+                user: {
+                  userId: ObjectId,
+                  username: "replyingPerson name_username",
+                },
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            ],
+          },
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]),
+      (blogData.likes = []);
+    blogData.authorId = req.user.input._id;
+    blogData.author = req.user.input.username;
+    blogData.likesCount = 0;
+    blogData.commentsCount = 0;
+    blogData.createdAt = new Date();
+    blogData.updatedAt = new Date();
+
+    // Insert the blog data into the MongoDB collection
+    const result = await blogsCollection.insertOne(blogData);
+
+    const createdBlog = {
+      _id: result.insertedId,
+      title: blogData.title,
+      content: sanitizedContent,
+      image: blogData.image,
+    };
+
+    res.status(201).json({
+      message: "Content created successfully.",
+      blog: createdBlog,
+    });
   } catch (error) {
     console.error("Error creating the content:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -124,12 +102,15 @@ const getAllBlogs = async (req, res) => {
   try {
     // Get token to make sure it is admin who wants unpaginated blogs
     const token = req.headers.authorization;
+
     if (!token) {
       return res.status(401).json({ error: "Unauthorized: Token is missing" });
     }
 
     try {
+      console.log("raw token : " + token);
       const decoded = await verifyAuthToken(token);
+      console.log(" the decoded in the handlers :" + decoded);
       req.user = decoded;
 
       if (req.user.role === "admin") {
