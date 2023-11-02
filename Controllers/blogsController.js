@@ -45,10 +45,10 @@ const createBlog = async (req, res) => {
           }
         });
       }
-      // sanitize the content and extract embedded images
+      // sanitize the content
       const { sanitizedContent } = processContentWithImages(blogData.content);
 
-      // console.log("Embedded Images (in createBlog):", embeddedImages);
+      
       // Set blog data
       blogData.content = sanitizedContent;
       (blogData.comments = [
@@ -90,12 +90,12 @@ const createBlog = async (req, res) => {
         },
       ]),
         (blogData.likes = []);
-      // blogData.writterId = req.user._id;
-      // blogData.writter = req.user.username;
+      blogData.writterId = req.user._id;
+      blogData.author = req.user.username;
       blogData.likesCount = 0;
       blogData.commentsCount = 0;
       blogData.createdAt = new Date();
-      blogData.updatedAt = new Date();
+      blogData.updatedAt = new Date();      
 
       // Insert the blog data into the MongoDB collection
       const result = await blogsCollection.insertOne(blogData);
@@ -105,16 +105,12 @@ const createBlog = async (req, res) => {
         title: blogData.title,
         content: sanitizedContent,
         image: blogData.image,
+    
       };
 
       res.status(201).json({
         message: "Content created successfully.",
-        blog: createdBlog,
-        request: {
-          type: "GET",
-          description: "Get the created blog post/any type",
-          url: `/api/v1/ped/blogs/${result.insertedId}`,
-        },
+        blog: createdBlog     
       });
     } catch (error) {
       return res.status(401).json({ error: "Unauthorized: Invalid token" });
