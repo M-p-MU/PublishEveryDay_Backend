@@ -16,7 +16,7 @@ const verifyAuthToken = (token) => {
     let originalToken= null;
     // if token has Bearer at the start, remove it
     if (token.startsWith("Bearer ")) {
-      originalToken = token.split(' ')[2];
+      originalToken = token.split(/\s+/);
       console.log("Token after splitting :"+ originalToken);
     }
     else {
