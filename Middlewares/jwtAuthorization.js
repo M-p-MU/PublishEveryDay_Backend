@@ -13,13 +13,24 @@ const generateAuthToken = (input) => {
 const verifyAuthToken = (token) => {
   const secretKey = process.env.JWT_SECRET;
   try {
+    let originalToken= null;
     // if token has Bearer at the start, remove it
     if (token.startsWith("Bearer ")) {
-      token = token.slice(7, token.length);
+      originalToken = token.split(' ')[2];
+      console.log("Token after splitting :"+ originalToken);
+    }
+    else {
+      originalToken = token;
+    }
+    // if the  originalToken is not null then verify it
+    if (originalToken === null) {
+      throw new Error("Token splitting failed");
     }
     // Verify the token
-    const decoded = jwt.verify(token, secretKey, { algorithm: "HS256" });
-
+    const decoded = jwt.verify(originalToken, secretKey, { algorithm: "HS256" });
+    if (!decoded) {
+      throw new Error("Token verification failed");
+    }
     // Check if the token has expired
     if (decoded && decoded.exp) {
       const currentTimestamp = Math.floor(Date.now() / 1000);

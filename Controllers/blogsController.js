@@ -12,7 +12,7 @@ const createBlog = async (req, res) => {
   try {
     // Check if a valid token is present in the request headers
     const token = req.headers.authorization;
-    console.log(token);
+    console.log("token before splitting :"+token);
     if (!token) {
       return res.status(401).json({ error: "Unauthorized: Token is missing" });
     }
