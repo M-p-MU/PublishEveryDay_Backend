@@ -12,7 +12,7 @@ const compression = require("compression");
 const methodOverride = require("method-override");
 const path = require("path");
 const helmet = require("helmet");
-const fs = require("fs");
+// const fs = require("fs");
 const app = express();
 app.use(morgan("dev"));
 connectDatabase();
@@ -27,18 +27,21 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(methodOverride("_method"));
 app.set("views", path.join(__dirname, "Views"));
-const images = path.join(__dirname, "blogImages");
-app.use("/blogImages", express.static(images));
-app.get("/blogImages/:imageName", (req, res) => {
-  const imagePath = path.join(images, req.params.imageName);
+// const images = path.join(__dirname, "blogImages");
+// app.use("/blogImages", express.static(images));
+// app.get("/blogImages/:imageName", (req, res) => {
+//   const imagePath = path.join(images, req.params.imageName);
 
   
-  if (fs.existsSync(imagePath)) {
-    res.sendFile(imagePath);
-  } else {
-    res.status(404).json({ error: "Image not found or invalid image name" });
-  }
-});
+//   if (fs.existsSync(imagePath)) {
+//     res.sendFile(imagePath);
+//   } else {
+//     res.status(404).json({ error: "Image not found or invalid image name" });
+//   }
+// });
+const images = path.join(__dirname, "blogImages");
+app.use("/blogImages", express.static(images));
+
 
 //routes configuration
 app.use("/api/v1/ped/", blogsRoutes);
