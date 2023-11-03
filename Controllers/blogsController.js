@@ -3,7 +3,7 @@ const { ObjectId } = require("mongodb");
 const { verifyAuthToken } = require("../Middlewares/jwtAuthorization.js");
 const { sanitizeContent } = require("../Middlewares/sanitizeContent.js");
 // const {handleFileUpload} = require("../Middlewares/handleFileUpload.js");
-const fs = require("fs");
+
 
 //__________Create a new blog/any content type___________/
 // eslint-disable-next-line no-undef
@@ -239,41 +239,41 @@ const getBlogById = async (req, res) => {
 
 //______________ Update an existing blog_________________/
 const updateBlog = async (req, res) => {
+  const token = req.headers.authorization;
   const id = `${req.params.id}`;
   const blogUpdatedData = {};
   const file = req.file;
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized: Token is missing" });
+  }
   try {
+    // Verify the token
+    const decoded = await verifyAuthToken(token);
+    req.user = decoded;   
+    
     const blogsCollection = getCollection("blogs");
-
-    if (!ObjectId.isValid(id)) {
-      return res
-        .status(400)
-        .json({ error: "Invalid ObjectId. You can't update content then." });
-    }
+    // get a blog by the passed id from params
+    const blog = await blogsCollection.findOne({ _id: new ObjectId(id) });
+   
+    // check if the user is an admin or the owner of the blog
+    
+    if (req.user.role === "admin" || req.user.input._id === blog.authorId) {  
 
     if (typeof blogUpdatedData !== "object" || blogUpdatedData === null) {
       return res.status(400).json({ error: "Invalid update data" });
     }
 
     if (file) {
-      const uploadDir = "./blogImages/";
-      const originalName = file.originalname;
-      const timestamp = Date.now();
-      const filename = `${timestamp}_${originalName}`;
-      const filePath = uploadDir + filename;
-
-      fs.rename(file.path, filePath, (err) => {
-        if (err) {
-          console.error("Error renaming image:", err);
-        } else {
-          console.log("Image renamed and updated successfully");
-          blogUpdatedData.image = filename;
-        }
-      });
+      blogUpdatedData.image = file.filename;
+         
     }
 
     for (const key in req.body) {
       blogUpdatedData[key] = req.body[key];
+    }
+    // Sanitize the content
+    if (blogUpdatedData.content) {
+      blogUpdatedData.content = await sanitizeContent(blogUpdatedData.content);
     }
 
     const updatedBlog = await blogsCollection.findOneAndUpdate(
@@ -281,18 +281,16 @@ const updateBlog = async (req, res) => {
       { $set: blogUpdatedData },
       { returnDocument: "after" }
     );
-
+    const formattedBlog = {
+      _id: updatedBlog._id,
+      ...updatedBlog,
+    };
+    
     if (updatedBlog === null) {
       return res
         .status(404)
         .json({ error: "Blog not found, content didn't get updated." });
     }
-
-    const formattedBlog = {
-      _id: updatedBlog._id,
-      ...updatedBlog,
-    };
-
     res.status(200).json({
       message: "Blog updated successfully.",
       blog: formattedBlog,
@@ -302,6 +300,16 @@ const updateBlog = async (req, res) => {
         url: `/api/v1/ped/blogs/${id}`,
       },
     });
+
+
+    } else {
+      // Handle the case where the requester is not an admin
+      return res.status(403).json({
+        error:
+          "Forbidden: You don't have the required privileges to access this resource.",});
+    }
+
+   
   } catch (error) {
     console.error("Error updating a blog:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -310,7 +318,8 @@ const updateBlog = async (req, res) => {
 
 //______________ Delete a blog by ID_____________________/
 const deleteBlog = async (req, res) => {
-  const id = `${req.params.id}`;
+
+    const id = `${req.params.id}`;
   const blogsCollection = getCollection("blogs");
   // Get the token to make sure it is an admin who wants to delete the blog
   const token = req.headers.authorization;
@@ -323,13 +332,19 @@ const deleteBlog = async (req, res) => {
     // Verify the token
     const decoded = await verifyAuthToken(token);
     req.user = decoded;
-
-    // Check if the user is an admin
+      // Check if the user is an admin
     if (req.user.role === "admin") {
       const blogsCollection = getCollection("blogs");
       const result = await blogsCollection.deleteOne({
         _id: new ObjectId(id),
       });
+      // confirm if the blog was deleted  and send confirmation message
+      if (result.deletedCount != 0) {
+        return res
+          .status(200)
+          .json({ message: "Blog deleted successfully" });
+      }
+     
 
       if (result.deletedCount === 0) {
         return res
@@ -342,7 +357,7 @@ const deleteBlog = async (req, res) => {
     } else {
       // The user is not an admin, check ownership
       const blog = await blogsCollection.findOne({ _id: new ObjectId(id) });
-      if (blog.ownerId !== req.user._id) {
+      if (blog.authorId !== req.user.input._id) {
         return res.status(403).json({
           error: "Forbidden: You don't have the required privileges.",
         });
@@ -353,6 +368,13 @@ const deleteBlog = async (req, res) => {
         _id: new ObjectId(id),
       });
 
+       // confirm if the blog was deleted  and send confirmation message
+       if (result.deletedCount != 0) {
+        return res
+          .status(200)
+          .json({ message: "Blog deleted successfully" });
+      }
+     
       if (result.deletedCount === 0) {
         return res
           .status(404)
@@ -429,8 +451,7 @@ const getTopBlogs = async (req, res) => {
 //____________Get certain blogger's blogs_______________/
 const getBlogsByOwner = async (req, res) => {
   const token = req.headers.authorization;
-  const userId = req.params.id;
-
+  const userId = req.params.id; 
   if (!token) {
     return res.status(401).json({ error: "Unauthorized: Token is missing" });
   }
@@ -438,14 +459,13 @@ const getBlogsByOwner = async (req, res) => {
   try {
     // Verify the token
     const decoded = await verifyAuthToken(token);
-    req.user = decoded;
-
-    if (req.user.role === "admin") {
+    req.user = decoded;    
+    if (req.user.role === "admin" ||req.user.input._id=== userId) {
       const blogsCollection = getCollection("blogs");
 
       // Check if the user has any blogs
       const userBlogs = await blogsCollection
-        .find({ ownerId: userId })
+        .find({ authorId: userId })
         .toArray();
 
       if (userBlogs.length === 0) {
