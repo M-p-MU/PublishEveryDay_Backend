@@ -64,7 +64,7 @@ const createUser = async (req, res) => {
     const emailTemplatePath = path.join(
       // eslint-disable-next-line no-undef
       __dirname,
-      "../Views/emailVerification.ejs"
+      "../views/emailVerification.ejs"
     );
     const emailTemplateContent = await fs.readFile(emailTemplatePath, "utf8");
 
@@ -606,6 +606,17 @@ const reportContent = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+// resetting the password 
+
+// const resetPassword=async()=>{
+
+// const email=req.body.email;
+// const user=
+
+// }
+
+
 
 module.exports = {
   createUser,

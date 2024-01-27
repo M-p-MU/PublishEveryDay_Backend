@@ -112,7 +112,6 @@ const getAllBlogs = async (req, res) => {
       const decoded = await verifyAuthToken(token);
       console.log(" the decoded in the handlers :" + decoded);
       req.user = decoded;
-
       if (req.user.role === "admin") {
         const blogsCollection = getCollection("blogs");
         const blogs = await blogsCollection.find({}).toArray();
@@ -1218,6 +1217,8 @@ const editReply = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
 module.exports = {
   createBlog,
   getAllBlogs,
